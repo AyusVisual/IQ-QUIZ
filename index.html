@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IQ Quiz</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Playfair+Display:wght@700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .slide-up { animation: slideUp 0.4s ease forwards; }
+    .pop { animation: pop 0.3s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .option-btn { transition: all 0.2s ease; }
+    .option-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .option-btn:disabled { cursor: default; }
+    .progress-fill { transition: width 0.5s ease; }
+    .glow { box-shadow: 0 0 40px rgba(99, 102, 241, 0.15); }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background: #0f0f1a;">
+   <!-- Screen 1: Registration -->
+   <div id="screen-register" class="h-full flex items-center justify-center p-6">
+    <div class="w-full max-w-md slide-up">
+     <div class="text-center mb-10">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+       <i data-lucide="brain" style="width:32px;height:32px;color:#fff;"></i>
+      </div>
+      <h1 id="el-title" class="text-4xl font-bold mb-2" style="font-family:'Playfair Display',serif;color:#e2e0ff;">IQ Challenge</h1>
+      <p class="text-sm" style="color:#7a78a0;">Test your cognitive abilities</p>
+     </div>
+     <form id="form-register" class="space-y-5">
+      <div>
+       <label for="inp-name" class="block text-xs font-semibold mb-2 tracking-wider uppercase" style="color:#8b89b0;">Your Name</label> <input id="inp-name" type="text" required placeholder="Enter your name" class="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" style="background:#1a1a2e;color:#e2e0ff;border:1px solid #2a2a4a;">
+      </div>
+      <div>
+       <label for="inp-age" class="block text-xs font-semibold mb-2 tracking-wider uppercase" style="color:#8b89b0;">Your Age</label> <input id="inp-age" type="number" required min="5" max="120" placeholder="Enter your age" class="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" style="background:#1a1a2e;color:#e2e0ff;border:1px solid #2a2a4a;">
+      </div><button type="submit" class="w-full py-3.5 rounded-xl font-semibold text-white text-sm tracking-wide" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Continue →</button>
+     </form>
+    </div>
+   </div><!-- Screen 2: Ready -->
+   <div id="screen-ready" class="h-full flex items-center justify-center p-6 hidden">
+    <div class="text-center slide-up">
+     <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-8" style="background:#1a1a2e;border:2px solid #2a2a4a;">
+      <i data-lucide="zap" style="width:36px;height:36px;color:#facc15;"></i>
+     </div>
+     <p id="el-greeting" class="text-lg mb-2" style="color:#8b89b0;"></p>
+     <h2 id="el-ready-msg" class="text-3xl font-bold mb-8" style="font-family:'Playfair Display',serif;color:#e2e0ff;">Are you ready?</h2><button id="btn-start" class="px-10 py-3.5 rounded-xl font-semibold text-white text-sm tracking-wide" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"> Start Quiz <i data-lucide="arrow-right" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-left:4px;"></i> </button>
+    </div>
+   </div><!-- Screen 3: Quiz -->
+   <div id="screen-quiz" class="h-full flex items-center justify-center p-6 hidden">
+    <div class="w-full max-w-lg fade-in">
+     <div class="flex items-center justify-between mb-4">
+      <span id="el-qnum" class="text-xs font-semibold tracking-wider uppercase" style="color:#8b89b0;">Question 1 / 5</span> <span id="el-score-live" class="text-xs font-semibold px-3 py-1 rounded-full" style="background:#1a1a2e;color:#6366f1;">Score: 0</span>
+     </div>
+     <div class="w-full h-1.5 rounded-full mb-8" style="background:#1a1a2e;">
+      <div id="el-progress" class="h-full rounded-full progress-fill" style="width:20%;background:linear-gradient(90deg,#6366f1,#8b5cf6);"></div>
+     </div>
+     <div class="rounded-2xl p-7 glow" style="background:#1a1a2e;border:1px solid #2a2a4a;">
+      <h3 id="el-question" class="text-lg font-semibold mb-6 leading-relaxed" style="color:#e2e0ff;"></h3>
+      <div id="el-options" class="space-y-3"></div>
+     </div>
+     <div id="el-feedback" class="text-center mt-5 text-sm font-semibold hidden" style="color:#8b89b0;"></div>
+    </div>
+   </div><!-- Screen 4: Result -->
+   <div id="screen-result" class="h-full flex items-center justify-center p-6 hidden">
+    <div class="text-center slide-up w-full max-w-md">
+     <div id="el-result-icon" class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 pop" style="background:#1a1a2e;border:2px solid #2a2a4a;"></div>
+     <h2 id="el-result-title" class="text-2xl font-bold mb-3 leading-snug" style="font-family:'Playfair Display',serif;color:#e2e0ff;"></h2>
+     <p id="el-result-msg" class="text-sm mb-8" style="color:#8b89b0;"></p>
+     <div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl mb-8" style="background:#1a1a2e;border:1px solid #2a2a4a;">
+      <i data-lucide="trophy" style="width:18px;height:18px;color:#facc15;"></i> <span id="el-final-score" class="font-bold" style="color:#e2e0ff;"></span>
+     </div><br><button id="btn-retry" class="px-10 py-3.5 rounded-xl font-semibold text-white text-sm tracking-wide" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Try Again</button>
+     <div class="mt-12 pt-8 border-t border-2a2a4a">
+      <p class="text-xs font-semibold tracking-wider uppercase mb-4" style="color:#8b89b0;">Connect With Me</p>
+      <div class="flex items-center justify-center gap-4"><a href="https://www.instagram.com/ayuu.shee.x/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110" style="background:#1a1a2e;border:1px solid #2a2a4a;color:#e2e0ff;"> <i data-lucide="instagram" style="width:18px;height:18px;"></i> </a> <a href="https://leetcode.com/u/AYU_CPP/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 font-bold text-sm" style="background:#1a1a2e;border:1px solid #2a2a4a;color:#e2e0ff;">LC</a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+const questions = [
+  { q: "What comes next in the sequence: 2, 6, 12, 20, ?", opts: ["28","30","32","24"], ans: 2 },
+  { q: "If all Bloops are Razzles and all Razzles are Lazzles, are all Bloops definitely Lazzles?", opts: ["Yes","No","Sometimes","Cannot determine"], ans: 0 },
+  { q: "What is the next number in this series: 1, 1, 2, 3, 5, 8, 13, ?", opts: ["18","20","21","19"], ans: 2 },
+  { q: "A clock shows 3:15. What is the angle between the hour and minute hands?", opts: ["0°","7.5°","15°","22.5°"], ans: 1 },
+  { q: "Which word can be formed by rearranging the letters in 'LISTEN'?", opts: ["ENLIST","SILENT","TINSEL","All of the above"], ans: 3 }
+];
+
+let userName = "", userAge = 0, currentQ = 0, score = 0;
+
+const defaultConfig = {
+  app_title: "IQ Challenge",
+  start_message: "Are you ready?",
+  bg_color: "#0f0f1a",
+  surface_color: "#1a1a2e",
+  text_color: "#e2e0ff",
+  accent_color: "#6366f1",
+  muted_color: "#8b89b0",
+  font_family: "DM Sans",
+  font_size: 16
+};
+
+function show(id) {
+  ["screen-register","screen-ready","screen-quiz","screen-result"].forEach(s => {
+    document.getElementById(s).classList.toggle("hidden", s !== id);
+  });
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById("el-qnum").textContent = `Question ${currentQ+1} / 5`;
+  document.getElementById("el-score-live").textContent = `Score: ${score}`;
+  document.getElementById("el-progress").style.width = `${(currentQ+1)*20}%`;
+  document.getElementById("el-question").textContent = q.q;
+  document.getElementById("el-feedback").classList.add("hidden");
+  const container = document.getElementById("el-options");
+  container.innerHTML = "";
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium";
+    btn.style.cssText = `background:${window.elementSdk?.config?.surface_color||defaultConfig.surface_color};color:${window.elementSdk?.config?.text_color||defaultConfig.text_color};border:1px solid #2a2a4a;`;
+    btn.textContent = opt;
+    btn.addEventListener("click", () => handleAnswer(i, btn));
+    container.appendChild(btn);
+  });
+}
+
+function handleAnswer(idx, btn) {
+  const btns = document.getElementById("el-options").querySelectorAll("button");
+  btns.forEach(b => b.disabled = true);
+  const correct = idx === questions[currentQ].ans;
+  if (correct) { score++; btn.style.background = "#22c55e"; btn.style.color = "#fff"; btn.style.borderColor = "#22c55e"; }
+  else { btn.style.background = "#ef4444"; btn.style.color = "#fff"; btn.style.borderColor = "#ef4444"; btns[questions[currentQ].ans].style.background = "#22c55e"; btns[questions[currentQ].ans].style.color = "#fff"; }
+  const fb = document.getElementById("el-feedback");
+  fb.textContent = correct ? "Correct! ✓" : "Not quite ✗";
+  fb.style.color = correct ? "#22c55e" : "#ef4444";
+  fb.classList.remove("hidden");
+  setTimeout(() => { currentQ++; currentQ < 5 ? renderQuestion() : showResult(); }, 1200);
+}
+
+function showResult() {
+  show("screen-result");
+  let icon, title, msg;
+  if (score === 5) { icon = "crown"; title = `Congratulations ${userName}, you are a Genius!`; msg = "Perfect score — absolutely brilliant!"; }
+  else if (score >= 3) { icon = "sparkles"; title = "Great job! You have a sharp mind!"; msg = `${userName}, you scored ${score}/5. Impressive thinking!`; }
+  else if (score >= 1) { icon = "lightbulb"; title = "Good try! Keep improving!"; msg = `${userName}, you scored ${score}/5. Keep challenging yourself!`; }
+  else { icon = "refresh-cw"; title = "Practice makes perfect!"; msg = `${userName}, don't give up — try again!`; }
+  document.getElementById("el-result-icon").innerHTML = `<i data-lucide="${icon}" style="width:40px;height:40px;color:#facc15;"></i>`;
+  document.getElementById("el-result-title").textContent = title;
+  document.getElementById("el-result-msg").textContent = msg;
+  document.getElementById("el-final-score").textContent = `${score} / 5`;
+  lucide.createIcons();
+}
+
+document.getElementById("form-register").addEventListener("submit", e => {
+  e.preventDefault();
+  userName = document.getElementById("inp-name").value.trim();
+  userAge = document.getElementById("inp-age").value;
+  if (!userName) return;
+  document.getElementById("el-greeting").textContent = `Welcome, ${userName} (age ${userAge})`;
+  show("screen-ready");
+  lucide.createIcons();
+});
+
+document.getElementById("btn-start").addEventListener("click", () => {
+  currentQ = 0; score = 0;
+  show("screen-quiz");
+  renderQuestion();
+});
+
+document.getElementById("btn-retry").addEventListener("click", () => {
+  currentQ = 0; score = 0;
+  show("screen-register");
+});
+
+// Element SDK
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const c = key => config[key] || defaultConfig[key];
+    document.getElementById("app").style.background = c("bg_color");
+    document.getElementById("el-title").textContent = c("app_title");
+    document.getElementById("el-ready-msg").textContent = c("start_message");
+    const font = c("font_family");
+    document.body.style.fontFamily = `${font}, 'DM Sans', sans-serif`;
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.bg_color || defaultConfig.bg_color, set: v => { config.bg_color = v; window.elementSdk.setConfig({ bg_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.accent_color || defaultConfig.accent_color, set: v => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => config.muted_color || defaultConfig.muted_color, set: v => { config.muted_color = v; window.elementSdk.setConfig({ muted_color: v }); } }
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ["app_title", config.app_title || defaultConfig.app_title],
+    ["start_message", config.start_message || defaultConfig.start_message]
+  ])
+});
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e4166308353869e',t:'MTc3NDgxMzc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
